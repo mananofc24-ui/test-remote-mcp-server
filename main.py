@@ -5,6 +5,8 @@ import json
 #Create the FastMCP server instance 
 mcp = FastMCP("Simple Calculator Server") 
 
+app = mcp.http_app()
+
 #Tool: Add two numbers 
 @mcp.tool 
 def add(a:int , b:int) ->int:
