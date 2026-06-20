@@ -48,8 +48,12 @@ def server_info()->str:
 
 #Start the server 
 if __name__ == "__main__":
-    import os 
-    port = int(os.environ.get("PORT" , 8000))
-    mcp.run(transport = "http" , port = port) 
+    import os
+    # Read the dynamic port given by Render, default to 8000 locally
+    port_env = int(os.environ.get("PORT", 8000))
+    
+    # Force the server to listen to all public network traffic
+    mcp.run(transport="http", host="0.0.0.0", port=port_env)
+ 
     
 
