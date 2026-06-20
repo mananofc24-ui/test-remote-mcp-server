@@ -1,15 +1,14 @@
 from fastmcp import FastMCP 
 import random 
 import json 
+from fastapi.middleware.cors import CORSMiddleware
 
-#Create the FastMCP server instance 
+# Create the FastMCP server instance 
 mcp = FastMCP("Simple Calculator Server") 
 
-app = mcp.http_app()
-
-#Tool: Add two numbers 
+# Tool: Add two numbers 
 @mcp.tool 
-def add(a:int , b:int) ->int:
+def add(a: int, b: int) -> int:
     """Add two numbers together. 
     
     Args: 
@@ -21,9 +20,9 @@ def add(a:int , b:int) ->int:
     """ 
     return a + b 
 
-#Tool: Generate a random number 
+# Tool: Generate a random number 
 @mcp.tool 
-def random_number(min_val : int = 1 , max_val : int = 100) ->int:
+def random_number(min_val: int = 1, max_val: int = 100) -> int:
     """Generate a random number within a range.
     
     Args: 
@@ -33,22 +32,35 @@ def random_number(min_val : int = 1 , max_val : int = 100) ->int:
     Returns: 
         A random integer between min_val and max_val
     """ 
-    return random.randint(min_val , max_val)
+    return random.randint(min_val, max_val)
 
-#Resource : Server information 
+# Resource: Server information 
 @mcp.resource("info://server")
-def server_info()->str:
+def server_info() -> str:
     """Get information about this server."""
     info = {
-        "name" : "Simple Calculator Server" , 
-        "version" : "1.0.0" , 
-        "description" : "A basic MCP server with math tools" , 
-        "tools" : ["add" , "random_number"] , 
+        "name" : "Simple Calculator Server", 
+        "version" : "1.0.0", 
+        "description" : "A basic MCP server with math tools", 
+        "tools" : ["add", "random_number"], 
         "author" : "Your Name"
     }
-    return json.dumps(info , indent = 2) 
+    return json.dumps(info, indent = 2) 
 
-#Start the server 
+# --- WEB DEPLOYMENT CONFIGURATIONS ---
+# Build the web app framework AFTER tools and resources are registered
+app = mcp.http_app()
+
+# Inject CORS security rules to let Claude's web client connect over the internet
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Start the server 
 if __name__ == "__main__":
     import os
     # Read the dynamic port given by Render, default to 8000 locally
@@ -56,6 +68,3 @@ if __name__ == "__main__":
     
     # Force the server to listen to all public network traffic
     mcp.run(transport="http", host="0.0.0.0", port=port_env)
- 
-    
-
